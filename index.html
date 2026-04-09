@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Masters Pool</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--masters-green:#006747;
+--masters-dark:#004d35;
+--masters-yellow:#f2c744;
+--masters-gold:#d4a843;
+--cream:#fdf8ef;
+--cream-dark:#f5edd8;
+--text:#1a1a1a;
+--text-light:#5a5a5a;
+--text-muted:#8a8a8a;
+--cut-red:#c0392b;
+--birdie-red:#cc0000;
+--bogey-blue:#2563eb;
+--card-bg:#ffffff;
+--card-border:#e8e0d0;
+--shadow:0 1px 3px rgba(0,0,0,.08);
+--shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.header{background:var(–masters-green);color:white;padding:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,50,30,.3)}
+.header-inner{max-width:900px;margin:0 auto;padding:20px 16px 16px;text-align:center}
+.header h1{font-family:‘Playfair Display’,serif;font-weight:800;font-size:1.8rem;letter-spacing:.02em;line-height:1.1;margin-bottom:2px}
+.header-subtitle{font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;opacity:.7;font-weight:500;margin-top:4px}
+.header-status{display:inline-block;margin-top:8px;padding:3px 12px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.status-live{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);animation:pulse-glow 2s ease-in-out infinite}
+.status-pre{background:rgba(242,199,68,.2);border:1px solid rgba(242,199,68,.4);color:var(–masters-yellow)}
+.status-final{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+@keyframes pulse-glow{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* TABS */
+.tabs{display:flex;max-width:900px;margin:0 auto;padding:0 16px}
+.tab{flex:1;padding:12px 8px;text-align:center;font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent;color:var(–text-muted);transition:all .2s}
+.tab.active{color:var(–masters-green);border-bottom-color:var(–masters-green)}
+.tab:hover{color:var(–masters-dark)}
+
+/* LAST UPDATED */
+.last-updated{text-align:center;padding:8px 16px 4px;font-size:.7rem;color:var(–text-muted);font-family:‘DM Mono’,monospace}
+
+/* SEARCH */
+.search-wrap{max-width:900px;margin:0 auto;padding:8px 16px}
+.search-input{width:100%;padding:10px 14px;border:1.5px solid var(–card-border);border-radius:8px;font-size:.85rem;font-family:‘DM Sans’,sans-serif;background:white;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(–masters-green)}
+.search-input::placeholder{color:var(–text-muted)}
+
+/* POOL TABLE */
+.pool-section{max-width:900px;margin:0 auto;padding:8px 16px 40px}
+.pool-row{background:var(–card-bg);border:1px solid var(–card-border);border-radius:10px;margin-bottom:6px;overflow:hidden;transition:box-shadow .2s;cursor:pointer}
+.pool-row:hover{box-shadow:var(–shadow-md)}
+.pool-row.dq .pool-main{opacity:.55}
+.pool-main{display:grid;grid-template-columns:36px 1fr auto;align-items:center;padding:10px 14px;gap:8px}
+.pool-rank{font-family:‘DM Mono’,monospace;font-weight:600;font-size:.8rem;color:var(–text-muted);text-align:center}
+.pool-rank.top3{color:var(–masters-gold);font-weight:700}
+.pool-name{font-weight:600;font-size:.9rem}
+.pool-score{font-family:‘DM Mono’,monospace;font-weight:700;font-size:1rem;min-width:50px;text-align:right}
+.pool-score.under-par{color:var(–birdie-red)}
+.pool-score.over-par{color:var(–bogey-blue)}
+.pool-score.dq{color:var(–cut-red);font-size:.75rem;font-weight:600}
+.pool-detail{display:none;padding:0 14px 12px;border-top:1px solid var(–card-border)}
+.pool-row.expanded .pool-detail{display:block}
+.pool-row.expanded{box-shadow:var(–shadow-md)}
+.pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
+.pick-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(–cream);border-radius:6px;font-size:.8rem}
+.pick-item.counting{background:#e8f5e9;border-left:3px solid var(–masters-green)}
+.pick-item.not-counting{opacity:.5}
+.pick-item.mc{opacity:.45;text-decoration:line-through}
+.pick-golfer{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px}
+.pick-score{font-family:‘DM Mono’,monospace;font-weight:600;font-size:.75rem;white-space:nowrap}
+.pick-score.under-par{color:var(–birdie-red)}
+.pick-score.over-par{color:var(–bogey-blue)}
+.pick-tier{font-size:.6rem;color:var(–text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.tb-line{margin-top:6px;font-size:.72rem;color:var(–text-muted);font-family:‘DM Mono’,monospace;text-align:right}
+
+/* TOURNAMENT LEADERBOARD */
+.lb-section{max-width:900px;margin:0 auto;padding:8px 16px 40px}
+.lb-header{display:grid;grid-template-columns:44px 1fr 56px 56px;align-items:center;padding:6px 14px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(–text-muted)}
+.lb-row{background:var(–card-bg);border:1px solid var(–card-border);border-radius:8px;margin-bottom:3px;display:grid;grid-template-columns:44px 1fr 56px 56px;align-items:center;padding:9px 14px}
+.lb-row.cut{opacity:.4}
+.lb-pos{font-family:‘DM Mono’,monospace;font-weight:600;font-size:.78rem;color:var(–text-muted)}
+.lb-name{font-weight:500;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-name.in-pool{font-weight:700;color:var(–masters-dark)}
+.lb-total{font-family:‘DM Mono’,monospace;font-weight:700;font-size:.85rem;text-align:center}
+.lb-total.under-par{color:var(–birdie-red)}
+.lb-total.over-par{color:var(–bogey-blue)}
+.lb-thru{font-family:‘DM Mono’,monospace;font-size:.75rem;text-align:center;color:var(–text-muted)}
+
+/* LOADING / ERROR */
+.loading{text-align:center;padding:60px 20px;color:var(–text-muted)}
+.loading-spinner{width:32px;height:32px;border:3px solid var(–card-border);border-top-color:var(–masters-green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{text-align:center;padding:30px 20px;color:var(–cut-red);font-size:.85rem}
+.retry-btn{margin-top:10px;padding:8px 20px;background:var(–masters-green);color:white;border:none;border-radius:6px;cursor:pointer;font-family:‘DM Sans’,sans-serif;font-weight:600;font-size:.8rem}
+
+/* CUT LINE */
+.cut-line{text-align:center;padding:6px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(–cut-red);border-top:1.5px dashed var(–cut-red);margin:4px 0;opacity:.6}
+
+/* RESPONSIVE */
+@media(max-width:500px){
+.pick-grid{grid-template-columns:1fr}
+.header h1{font-size:1.5rem}
+.lb-row,.lb-header{grid-template-columns:38px 1fr 48px 48px}
+}
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>The Masters Pool</h1>
+    <div class="header-subtitle">Augusta National &middot; 2026</div>
+    <div class="header-status status-pre" id="statusBadge">Loading...</div>
+  </div>
+</div>
+
+<div style="background:white;border-bottom:1px solid var(--card-border)">
+  <div class="tabs">
+    <div class="tab active" data-tab="pool" onclick="switchTab('pool')">Pool Standings</div>
+    <div class="tab" data-tab="leaderboard" onclick="switchTab('leaderboard')">Tournament</div>
+  </div>
+</div>
+
+<div class="last-updated" id="lastUpdated"></div>
+
+<div id="poolView">
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="Search names or golfers..." id="searchInput" oninput="renderPool()">
+  </div>
+  <div class="pool-section" id="poolContainer">
+    <div class="loading"><div class="loading-spinner"></div>Fetching scores from ESPN...</div>
+  </div>
+</div>
+
+<div id="lbView" style="display:none">
+  <div class="lb-section" id="lbContainer">
+    <div class="loading"><div class="loading-spinner"></div>Loading leaderboard...</div>
+  </div>
+</div>
+
+<script>
+const POOL_DATA = [{"name":"Owen Vogel","picks":["Scottie Scheffler","Patrick Reed","Shane Lowry","Jason Day","Ryan Gerard","Cameron Young"],"tieBreaker":-12},{"name":"Samson Weiner","picks":["Scottie Scheffler","Brooks Koepka","Shane Lowry","Cameron Smith","Michael Kim","Hideki Matsuyama"],"tieBreaker":-13},{"name":"Doug Popper","picks":["Scottie Scheffler","Cameron Young","Akshay Bhatia","Daniel Berger","Michael Kim","Brooks Koepka"],"tieBreaker":-14},{"name":"Martin Grier","picks":["Scottie Scheffler","Brooks Koepka","Adam Scott","Harris English","Ryan Fox","Tommy Fleetwood"],"tieBreaker":-12},{"name":"James Morgan","picks":["Scottie Scheffler","Cameron Young","Russell Henley","Corey Conners","Dustin Johnson","Patrick Reed"],"tieBreaker":-12},{"name":"AJ Dale","picks":["Bryson DeChambeau","Jordan Spieth","Viktor Hovland","Cameron Smith","Wyndham Clark","Tommy Fleetwood"],"tieBreaker":-14},{"name":"Harrison Brown","picks":["Bryson DeChambeau","Cameron Young","Russell Henley","Corey Conners","Dustin Johnson","Tommy Fleetwood"],"tieBreaker":-12},{"name":"Jonah Weiner","picks":["Scottie Scheffler","Cameron Young","Akshay Bhatia","Ben Griffin","Ryan Fox","Robert MacIntyre"],"tieBreaker":-11},{"name":"Michael Dorsey","picks":["Scottie Scheffler","Cameron Young","Si Woo Kim","Jason Day","Kurt Kitayama","Tommy Fleetwood"],"tieBreaker":-11},{"name":"Wyatt Schiff","picks":["Scottie Scheffler","Robert MacIntyre","Chris Gotterup","Gary Woodland","Ryan Fox","Justin Rose"],"tieBreaker":-13},{"name":"Alex NIckel","picks":["Scottie Scheffler","Matt Fitzpatrick","Si Woo Kim","Maverick McNealy","Kurt Kitayama","Tommy Fleetwood"],"tieBreaker":-13},{"name":"Jack Duguy","picks":["Scottie Scheffler","Matt Fitzpatrick","Jake Knapp","Corey Conners","Dustin Johnson","Patrick Reed"],"tieBreaker":-11},{"name":"Chris Keller","picks":["Jon Rahm","Patrick Reed","Russell Henley","Corey Conners","Dustin Johnson","Matt FItzpatrick"],"tieBreaker":-11},{"name":"Hayden Dearie ","picks":["Bryson DeChambeau","Tommy Fleetwood","Russell Henley","Rasmus H\u00f8jgaard","Keegan Bradley","Chris Gotterup"],"tieBreaker":-9},{"name":"Jake Haas","picks":["Jon Rahm","Patrick Reed","Akshay Bhatia","Corey Conners","Michael Kim","Tommy Fleetwood"],"tieBreaker":-10},{"name":"Mike Daniel","picks":["Xander Schauffele","Cameron Young","Russell Henley","Rasmus H\u00f8jgaard","Keegan Bradley","Justin Rose"],"tieBreaker":-12},{"name":"Colby Hart","picks":["Scottie Scheffler","Cameron Young","Jake Knapp","Maverick McNealy","Dustin Johnson","J.J. Spaun"],"tieBreaker":-10},{"name":"George Curley","picks":["Collin Morikawa","Hideki Matsuyama","Si Woo Kim","Sungjae Im","Kurt Kitayama","Min Woo Lee"],"tieBreaker":-15},{"name":"Jake Altman ","picks":["Bryson DeChambeau","Matt Fitzpatrick","Akshay Bhatia","Gary Woodland","Ryan Fox","Cameron Young"],"tieBreaker":-9},{"name":"James Wechsler","picks":["Scottie Scheffler","Tommy Fleetwood","Akshay Bhatia","Sam Burns","Harry Hall","Cameron Young"],"tieBreaker":-10},{"name":"Kyle Galin","picks":["Xander Schauffele","Cameron Young","Nicolai H\u00f8jgaard","Corey Conners","Alex Noren","Matt Fitzpatrick"],"tieBreaker":-8},{"name":"Josh Tenenbaum","picks":["Jon Rahm","Cameron Young","Jacob Bridgeman","Corey Conners","Keegan Bradley","Tommy Fleetwood"],"tieBreaker":-11},{"name":"Zuf and Schorr","picks":["Rory McIlroy","Patrick Reed","Nicolai H\u00f8jgaard","Corey Conners","Harry Hall","Cameron Young"],"tieBreaker":-12},{"name":"MJ Atkins","picks":["Scottie Scheffler","Matt Fitzpatrick","Justin Thomas","Brian Harman","Wyndham Clark","Nicolai H\u00f8jgaard"],"tieBreaker":-14},{"name":"John Desantis","picks":["Scottie Scheffler","Tommy Fleetwood","Shane Lowry","Aaron Rai","Dustin Johnson","Brooks Koepka"],"tieBreaker":-11},{"name":"Alex Jacobs","picks":["Xander Schauffele","Cameron Young","Tyrrell Hatton","Corey Conners","Keegan Bradley","Justin Rose"],"tieBreaker":-12},{"name":"Ben Schiff","picks":["Ludvig \u00c5berg","Cameron Young","Chris Gotterup","Gary Woodland","Dustin Johnson","Tommy Fleetwood"],"tieBreaker":-15},{"name":"Jackson Harwell","picks":["Scottie Scheffler","Hideki Matsuyama","Si Woo Kim","Ben Griffin","Wyndham Clark","Tommy Fleetwood"],"tieBreaker":-13},{"name":"Nate Park","picks":["Scottie Scheffler","Tommy Fleetwood","Russell Henley","Ben Griffin","Ryan Fox","Patrick Reed"],"tieBreaker":-12},{"name":"Drew Schlesinger","picks":["Rory McIlroy","Cameron Young","Russell Henley","Sungjae Im","Andrew Novak","Matt Fitzpatrick"],"tieBreaker":-12},{"name":"Nick Purnell","picks":["Scottie Scheffler","Justin Rose","Justin Thomas","Corey Conners","Wyndham Clark","Jordan Spieth"],"tieBreaker":-12},{"name":"Jack Marcus","picks":["Jon Rahm","Cameron Young","Tyrrell Hatton","Gary Woodland","Sergio Garc\u00eda","Matt Fitzpatrick"],"tieBreaker":-13},{"name":"George Seybold","picks":["Ludvig \u00c5berg","Tommy Fleetwood","Akshay Bhatia","Harris English","Casey Jarvis","Min Woo Lee"],"tieBreaker":-10},{"name":"Sean Mockler","picks":["Xander Schauffele","Matt Fitzpatrick","Si Woo Kim","Sam Burns","Alex Noren","Cameron Young"],"tieBreaker":-10},{"name":"Will King","picks":["Bryson DeChambeau","Justin Rose","J.J. Spaun","Sam Burns","Wyndham Clark","Matt Fitzpatrick"],"tieBreaker":-12},{"name":"Declan Carroll","picks":["Scottie Scheffler","Tommy Fleetwood","Shane Lowry","Max Homa","Keegan Bradley","Brooks Koepka"],"tieBreaker":-11},{"name":"Ryan Schaufele","picks":["Jon Rahm","Matt Fitzpatrick","Russell Henley","Sam Burns","Nico Echavarria","Tommy Fleetwood"],"tieBreaker":-15},{"name":"Alex Lashgari","picks":["Ludvig \u00c5berg","Matt Fitzpatrick","Si Woo Kim","Max Homa","Ryan Fox","Tommy Fleetwood"],"tieBreaker":-11},{"name":"Charlie Hoine","picks":["Xander Schauffele","Hideki Matsuyama","Adam Scott","Corey Conners","Wyndham Clark","Patrick Reed"],"tieBreaker":-11},{"name":"Eli Gordon","picks":["Scottie Scheffler","Tommy Fleetwood","Akshay Bhatia","Corey Conners","Harry Hall","Patrick Reed"],"tieBreaker":-15},{"name":"Ryan Unikel","picks":["Xander Schauffele","Tommy Fleetwood","Si Woo Kim","Maverick McNealy","Ryan Gerard","Robert MacIntyre"],"tieBreaker":-10},{"name":"Scott Black","picks":["Bryson DeChambeau","Tommy Fleetwood","Adam Scott","Max Homa","Harry Hall","Brooks Koepka"],"tieBreaker":-13},{"name":"Noah Benson","picks":["Scottie Scheffler","Cameron Young","Chris Gotterup","Brian Harman","Kurt Kitayama","Jordan Spieth"],"tieBreaker":-8},{"name":"Lachlan Isaacs","picks":["Ludvig \u00c5berg","Matt Fitzpatrick","Adam Scott","Jason Day","Max Greyserman","Corey Conners"],"tieBreaker":-11},{"name":"Mike Dugan","picks":["Jon Rahm","Justin Rose","Si Woo Kim","Marco Penge","Ryan Gerard","Cameron Young"],"tieBreaker":-13},{"name":"Greg Schwartz","picks":["Ludvig \u00c5berg","Cameron Young","Nicolai H\u00f8jgaard","Harris English","Sam Stevens","Matt Fitzpatrick"],"tieBreaker":-14},{"name":"Finn Johnston","picks":["Ludvig \u00c5berg","Cameron Young","Jacob Bridgeman","Gary Woodland","Michael Kim","Chris Gotterup"],"tieBreaker":-15},{"name":"Walker Pence","picks":["Scottie Scheffler","Brooks Koepka","Shane Lowry","Corey Conners","Michael Kim","Tommy Fleetwood"],"tieBreaker":-12},{"name":"Boaz Ginzburg","picks":["Rory McIlroy","Tommy Fleetwood","Si Woo Kim","Corey Conners","Kurt Kitayama","Hideki Matsuyama"],"tieBreaker":-11},{"name":"Sam Bogdanov","picks":["Xander Schauffele","Tommy Fleetwood","Nicolai H\u00f8jgaard","Corey Conners","Max Greyserman","Matt Fitzpatrick"],"tieBreaker":-13},{"name":"Henry Hunter","picks":["Xander Schauffele","Cameron Young","Si Woo Kim","Corey Conners","Michael Kim","Matt Fitzpatrick"],"tieBreaker":-9},{"name":"Reid Belcher","picks":["Jon Rahm","Cameron Young","Tyrrell Hatton","Max Homa","Keegan Bradley","Akshay Bhatia"],"tieBreaker":-13},{"name":"Jordan Katz","picks":["Xander Schauffele","Tommy Fleetwood","Jake Knapp","Ben Griffin","Sergio Garc\u00eda","Jordan Spieth"],"tieBreaker":-10},{"name":"Max Kushnick","picks":["Scottie Scheffler","Tommy Fleetwood","Akshay Bhatia","Harris English","Wyndham Clark","Justin Rose"],"tieBreaker":-11},{"name":"Eliot Gottsegen","picks":["Scottie Scheffler","Cameron Young","Si Woo Kim","Maverick McNealy","Kurt Kitayama","Matt Fitzpatrick"],"tieBreaker":-10},{"name":"Cooper Danzig","picks":["Xander Schauffele","Matt Fitzpatrick","Si Woo Kim","Corey Conners","Michael Kim","Hideki Matsuyama"],"tieBreaker":-11},{"name":"Matt Daniel","picks":["Scottie Scheffler","Matt Fitzpatrick","Akshay Bhatia","Sam Burns","Keegan Bradley","Cameron Young"],"tieBreaker":-13},{"name":"Evan Black","picks":["Scottie Scheffler","Tommy Fleetwood","Russell Henley","Maverick McNealy","Keegan Bradley","Hideki Matsuyama"],"tieBreaker":-13},{"name":"Ryan McBride","picks":["Scottie Scheffler","Matt Fitzpatrick","Russell Henley","Sam Burns","Alex Noren","Cameron Young"],"tieBreaker":-13},{"name":"Ethan Paik","picks":["Ludvig \u00c5berg","Min Woo Lee","Adam Scott","Jason Day","Ryan Gerard","Matt Fitzpatrick"],"tieBreaker":-7},{"name":"David Hendon","picks":["Scottie Scheffler","Tommy Fleetwood","Viktor Hovland","Brian Harman","Keegan Bradley","Matt Fitzpatrick"],"tieBreaker":-13},{"name":"Luke Egan","picks":["Xander Schauffele","Cameron Young","Viktor Hovland","Maverick McNealy","Alex Noren","Matt Fitzpatrick"],"tieBreaker":-11},{"name":"Dustin Cohen","picks":["Rory McIlroy","Min Woo Lee","Chris Gotterup","Maverick McNealy","Michael Kim","Hideki Matsuyama"],"tieBreaker":-12},{"name":"Riley McMahon","picks":["Scottie Scheffler","Brooks Koepka","Patrick Cantlay","Brian Harman","Wyndham Clark","Matt Fitzpatrick"],"tieBreaker":-12}];
+
+const TIERS = ['Tier 1','Tier 2','Tier 3','Tier 4','Tier 5','Flex'];
+const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard';
+const MASTERS_EVENT_ID = '401811941';
+const PROXY = 'https://corsproxy.io/?url=';
+
+let golferScores = {};    // name -> { score: number|null, scoreStr: string, pos: string, thru: string, status: string, rounds:[] }
+let tournamentStatus = 'pre';  // pre, in, post
+let tournamentRound = 0;
+let competitors = [];
+let poolResults = [];
+let allPoolGolfers = new Set();
+
+// Collect all golfer names in the pool
+POOL_DATA.forEach(p => p.picks.forEach(g => { if (g) allPoolGolfers.add(g.toLowerCase()); }));
+
+// Name matching helpers
+function normalize(n) { 
+  return n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z ]/g,'').trim(); 
+}
+
+function buildNameMap(espnNames) {
+  const map = {};
+  const poolNames = new Set();
+  POOL_DATA.forEach(p => p.picks.forEach(g => { if(g) poolNames.add(g); }));
+  
+  for (const pn of poolNames) {
+    const pnNorm = normalize(pn);
+    // Try exact
+    let match = espnNames.find(en => normalize(en) === pnNorm);
+    if (!match) {
+      // Try last name + first initial
+      const parts = pnNorm.split(' ');
+      if (parts.length >= 2) {
+        const last = parts[parts.length-1];
+        const firstInit = parts[0][0];
+        match = espnNames.find(en => {
+          const enNorm = normalize(en);
+          const enParts = enNorm.split(' ');
+          if (enParts.length < 2) return false;
+          return enParts[enParts.length-1] === last && enParts[0][0] === firstInit;
+        });
+      }
+    }
+    if (!match) {
+      // Try contains last name
+      const parts = pnNorm.split(' ');
+      const last = parts[parts.length-1];
+      match = espnNames.find(en => normalize(en).includes(last) && normalize(en).includes(parts[0][0]));
+    }
+    if (match) map[pn] = match;
+  }
+  return map;
+}
+
+async function fetchScores() {
+  let data;
+  try {
+    // Try direct first
+    let resp = await fetch(ESPN_URL);
+    if (!resp.ok) throw new Error('Direct failed');
+    data = await resp.json();
+  } catch(e) {
+    try {
+      let resp = await fetch(PROXY + encodeURIComponent(ESPN_URL));
+      if (!resp.ok) throw new Error('Proxy failed');
+      data = await resp.json();
+    } catch(e2) {
+      throw new Error('Could not reach ESPN API');
+    }
+  }
+
+  // Find the Masters event
+  let event = data.events?.find(e => e.id === MASTERS_EVENT_ID);
+  if (!event) {
+    // Fallback: find by name
+    event = data.events?.find(e => e.name?.toLowerCase().includes('masters'));
+  }
+  if (!event) {
+    // Use whatever event is available  
+    event = data.events?.[0];
+  }
+  if (!event) throw new Error('No event data found');
+
+  const comp = event.competitions?.[0];
+  if (!comp) throw new Error('No competition data');
+
+  competitors = comp.competitors || [];
+  
+  // Determine tournament status  
+  const statusType = event.status?.type?.name || comp.status?.type?.name || '';
+  if (statusType === 'STATUS_FINAL' || statusType === 'STATUS_PLAY_COMPLETE') {
+    tournamentStatus = 'post';
+  } else if (statusType === 'STATUS_IN_PROGRESS' || statusType === 'STATUS_PLAY_SUSPENDED') {
+    tournamentStatus = 'in';
+  } else {
+    tournamentStatus = 'pre';
+  }
+
+  // Build scores
+  const espnNames = competitors.map(c => c.athlete?.displayName || c.athlete?.fullName || '');
+  const nameMap = buildNameMap(espnNames);
+
+  golferScores = {};
+  
+  for (const c of competitors) {
+    const name = c.athlete?.displayName || c.athlete?.fullName || '';
+    const scoreStr = c.score || 'E';
+    const scoreNum = parseScore(scoreStr);
+    const pos = c.status?.position?.displayName || c.sortOrder?.toString() || '';
+    const thru = c.status?.thru;
+    const period = c.status?.period || c.linescores?.length || 0;
+    const statusDesc = c.status?.type?.description || c.status?.type?.name || '';
+    const isCut = statusDesc.toLowerCase().includes('cut') || pos.toLowerCase().includes('cut');
+    const isWD = statusDesc.toLowerCase().includes('wd') || statusDesc.toLowerCase().includes('withdraw');
+
+    let thruStr = '';
+    if (thru === 18 || thru === 0) thruStr = 'F';
+    else if (thru) thruStr = thru.toString();
+    else if (statusDesc.toLowerCase().includes('final') || statusDesc.toLowerCase().includes('complete')) thruStr = 'F';
+    else thruStr = '';
+
+    golferScores[name] = {
+      score: scoreNum,
+      scoreStr: scoreStr,
+      pos: pos,
+      thru: thruStr,
+      isCut: isCut,
+      isWD: isWD,
+      round: period
+    };
+  }
+
+  // Map pool names to ESPN names
+  for (const [poolName, espnName] of Object.entries(nameMap)) {
+    if (golferScores[espnName] && poolName !== espnName) {
+      golferScores[poolName] = golferScores[espnName];
+    }
+  }
+}
+
+function parseScore(s) {
+  if (!s || s === 'E') return 0;
+  s = s.toString().trim();
+  if (s === 'E') return 0;
+  const n = parseInt(s);
+  return isNaN(n) ? null : n;
+}
+
+function formatScore(n) {
+  if (n === null || n === undefined) return '--';
+  if (n === 0) return 'E';
+  return n > 0 ? '+' + n : n.toString();
+}
+
+function scoreClass(n) {
+  if (n === null || n === undefined) return '';
+  if (n < 0) return 'under-par';
+  if (n > 0) return 'over-par';
+  return '';
+}
+
+function computePool() {
+  poolResults = POOL_DATA.map(p => {
+    const pickData = p.picks.map((golfer, i) => {
+      const gs = golfer ? golferScores[golfer] : null;
+      return {
+        name: golfer || '???',
+        tier: TIERS[i],
+        score: gs ? gs.score : null,
+        scoreStr: gs ? gs.scoreStr : '--',
+        isCut: gs ? gs.isCut : false,
+        isWD: gs ? gs.isWD : false,
+        thru: gs ? gs.thru : '',
+        pos: gs ? gs.pos : '',
+        found: !!gs
+      };
+    });
+
+    // Sort picks by score (lowest first), nulls last
+    const validPicks = pickData.filter(p => p.score !== null && !p.isCut && !p.isWD);
+    const invalidPicks = pickData.filter(p => p.score === null || p.isCut || p.isWD);
+    
+    validPicks.sort((a, b) => a.score - b.score);
+
+    const counting = validPicks.slice(0, 4);
+    const notCounting = validPicks.slice(4);
+    
+    const isDQ = counting.length < 4;
+    
+    let aggregate = null;
+    if (!isDQ) {
+      aggregate = counting.reduce((sum, p) => sum + p.score, 0);
+    }
+
+    // Mark counting status
+    const countingNames = new Set(counting.map(p => p.name));
+    pickData.forEach(pd => {
+      pd.counting = countingNames.has(pd.name);
+    });
+
+    return {
+      name: p.name,
+      picks: pickData,
+      aggregate: aggregate,
+      isDQ: isDQ,
+      tieBreaker: p.tieBreaker,
+      countingCount: counting.length
+    };
+  });
+
+  // Sort: non-DQ by aggregate (low first), then tieBreaker closest to winning score
+  // For tiebreaker, closer to the actual winning score wins
+  const winningScore = competitors.length > 0 ? parseScore(competitors[0]?.score) : null;
+
+  poolResults.sort((a, b) => {
+    if (a.isDQ && !b.isDQ) return 1;
+    if (!a.isDQ && b.isDQ) return -1;
+    if (a.isDQ && b.isDQ) return 0;
+    if (a.aggregate !== b.aggregate) return a.aggregate - b.aggregate;
+    // Tiebreaker: closest to winning score
+    if (winningScore !== null) {
+      const aDiff = Math.abs(a.tieBreaker - winningScore);
+      const bDiff = Math.abs(b.tieBreaker - winningScore);
+      return aDiff - bDiff;
+    }
+    return 0;
+  });
+
+  // Assign ranks
+  let rank = 1;
+  for (let i = 0; i < poolResults.length; i++) {
+    if (poolResults[i].isDQ) {
+      poolResults[i].rank = '--';
+    } else {
+      if (i > 0 && !poolResults[i-1].isDQ && poolResults[i].aggregate === poolResults[i-1].aggregate) {
+        poolResults[i].rank = poolResults[i-1].rank;
+      } else {
+        poolResults[i].rank = rank;
+      }
+      rank = i + 2;
+    }
+  }
+}
+
+function renderPool() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const container = document.getElementById('poolContainer');
+  
+  let filtered = poolResults;
+  if (query) {
+    filtered = poolResults.filter(p => {
+      if (p.name.toLowerCase().includes(query)) return true;
+      return p.picks.some(pk => pk.name.toLowerCase().includes(query));
+    });
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">No results found</div>';
+    return;
+  }
+
+  let html = '';
+  for (const p of filtered) {
+    const rankStr = p.rank === '--' ? '' : p.rank;
+    const rankClass = typeof p.rank === 'number' && p.rank <= 3 ? 'top3' : '';
+    const scoreStr = p.isDQ ? 'DQ' : formatScore(p.aggregate);
+    const scoreColorClass = p.isDQ ? 'dq' : scoreClass(p.aggregate);
+    const dqClass = p.isDQ ? 'dq' : '';
+
+    let picksHtml = '';
+    for (const pk of p.picks) {
+      let itemClass = 'pick-item';
+      if (pk.isCut || pk.isWD) itemClass += ' mc';
+      else if (pk.counting) itemClass += ' counting';
+      else itemClass += ' not-counting';
+
+      const pkScoreStr = pk.isCut ? 'MC' : pk.isWD ? 'WD' : (pk.found ? formatScore(pk.score) : '--');
+      const pkScoreClass = pk.isCut || pk.isWD || !pk.found ? '' : scoreClass(pk.score);
+      const thruBit = pk.thru && pk.thru !== 'F' ? ` (${pk.thru})` : '';
+      
+      picksHtml += `<div class="${itemClass}">
+        <div><span class="pick-tier">${pk.tier}</span> <span class="pick-golfer">${pk.name}</span></div>
+        <span class="pick-score ${pkScoreClass}">${pkScoreStr}${thruBit}</span>
+      </div>`;
+    }
+
+    html += `<div class="pool-row ${dqClass}" onclick="this.classList.toggle('expanded')">
+      <div class="pool-main">
+        <span class="pool-rank ${rankClass}">${rankStr}</span>
+        <span class="pool-name">${p.name}</span>
+        <span class="pool-score ${scoreColorClass}">${scoreStr}</span>
+      </div>
+      <div class="pool-detail">
+        <div class="pick-grid">${picksHtml}</div>
+        <div class="tb-line">TB: ${p.tieBreaker}</div>
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('lbContainer');
+  if (competitors.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">No leaderboard data yet</div>';
+    return;
+  }
+
+  let html = '<div class="lb-header"><span>Pos</span><span>Player</span><span>Score</span><span>Thru</span></div>';
+  
+  let cutShown = false;
+  
+  for (const c of competitors) {
+    const name = c.athlete?.displayName || c.athlete?.fullName || '';
+    const scoreStr = c.score || 'E';
+    const scoreNum = parseScore(scoreStr);
+    const pos = c.status?.position?.displayName || c.sortOrder?.toString() || '';
+    const statusDesc = c.status?.type?.description || c.status?.type?.name || '';
+    const isCut = statusDesc.toLowerCase().includes('cut') || pos.toLowerCase().includes('cut');
+    const thru = c.status?.thru;
+
+    let thruStr = '';
+    if (thru === 18 || thru === 0) thruStr = 'F';
+    else if (thru) thruStr = thru.toString();
+    else if (statusDesc.toLowerCase().includes('final') || statusDesc.toLowerCase().includes('complete')) thruStr = 'F';
+    
+    if (isCut && !cutShown) {
+      html += '<div class="cut-line">Projected Cut</div>';
+      cutShown = true;
+    }
+
+    const inPool = allPoolGolfers.has(normalize(name));
+    const nameClass = inPool ? 'lb-name in-pool' : 'lb-name';
+    const cutClass = isCut ? 'cut' : '';
+    const totalClass = scoreClass(scoreNum);
+
+    html += `<div class="lb-row ${cutClass}">
+      <span class="lb-pos">${pos}</span>
+      <span class="${nameClass}">${name}</span>
+      <span class="lb-total ${totalClass}">${scoreStr}</span>
+      <span class="lb-thru">${thruStr}</span>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function updateStatus() {
+  const badge = document.getElementById('statusBadge');
+  const updated = document.getElementById('lastUpdated');
+  
+  if (tournamentStatus === 'post') {
+    badge.textContent = 'Final';
+    badge.className = 'header-status status-final';
+  } else if (tournamentStatus === 'in') {
+    badge.textContent = '● Live';
+    badge.className = 'header-status status-live';
+  } else {
+    badge.textContent = 'Starts Today';
+    badge.className = 'header-status status-pre';
+  }
+
+  const now = new Date();
+  updated.textContent = 'Updated ' + now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('poolView').style.display = tab === 'pool' ? '' : 'none';
+  document.getElementById('lbView').style.display = tab === 'leaderboard' ? '' : 'none';
+}
+
+async function init() {
+  try {
+    await fetchScores();
+    computePool();
+    renderPool();
+    renderLeaderboard();
+    updateStatus();
+  } catch(e) {
+    document.getElementById('poolContainer').innerHTML = `
+      <div class="error-msg">
+        ${e.message}<br>
+        <button class="retry-btn" onclick="init()">Retry</button>
+      </div>`;
+    // Still compute pool with no scores
+    computePool();
+    renderPool();
+  }
+}
+
+// Auto-refresh every 60s during tournament
+setInterval(async () => {
+  if (tournamentStatus === 'in') {
+    try {
+      await fetchScores();
+      computePool();
+      renderPool();
+      renderLeaderboard();
+      updateStatus();
+    } catch(e) {}
+  }
+}, 60000);
+
+init();
+</script>
+
+</body>
+</html>
