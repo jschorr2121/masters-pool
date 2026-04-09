@@ -57,10 +57,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 /* POOL TABLE */
 .pool-section{max-width:900px;margin:0 auto;padding:8px 16px 40px}
-.pool-row{background:var(–card-bg);border:1px solid var(–card-border);border-radius:10px;margin-bottom:6px;overflow:hidden;transition:box-shadow .2s;cursor:pointer}
-.pool-row:hover{box-shadow:var(–shadow-md)}
+.pool-row{background:#ffffff;border:1.5px solid #d9d0c1;border-radius:12px;margin-bottom:8px;overflow:hidden;transition:all .15s ease;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.pool-row:hover{box-shadow:0 3px 10px rgba(0,0,0,.1);border-color:#c0b8a8}
+.pool-row:active{transform:scale(.985);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .pool-row.dq .pool-main{opacity:.55}
-.pool-main{display:grid;grid-template-columns:36px 1fr auto;align-items:center;padding:10px 14px;gap:8px}
+.pool-main{display:grid;grid-template-columns:36px 1fr auto;align-items:center;padding:12px 16px;gap:8px}
 .pool-rank{font-family:‘DM Mono’,monospace;font-weight:600;font-size:.8rem;color:var(–text-muted);text-align:center}
 .pool-rank.top3{color:var(–masters-gold);font-weight:700}
 .pool-name{font-weight:600;font-size:.9rem}
@@ -70,7 +71,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .pool-score.dq{color:#c0392b !important;font-size:.75rem;font-weight:600}
 .pool-detail{display:none;padding:0 14px 12px;border-top:1px solid var(–card-border)}
 .pool-row.expanded .pool-detail{display:block}
-.pool-row.expanded{box-shadow:var(–shadow-md)}
+.pool-row.expanded{box-shadow:0 4px 14px rgba(0,0,0,.12);border-color:#006747}
 .pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
 .pick-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:var(–cream);border-radius:6px;font-size:.8rem}
 .pick-item.counting{background:#e8f5e9;border-left:3px solid var(–masters-green)}
